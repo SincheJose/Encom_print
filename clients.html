@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MVH | Portal de Clientes – Consumo y Renta (Demo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji','Segoe UI Emoji'; }
+    .card { @apply bg-white rounded-2xl shadow-sm border border-gray-200; }
+    .pill { @apply px-3 py-1 rounded-full text-xs font-semibold; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Topbar -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-red-600 w-10 h-10 rounded-xl flex items-center justify-center text-white font-black">MVH</div>
+        <div>
+          <h1 class="text-lg font-extrabold text-gray-900 leading-tight">Portal de Clientes</h1>
+          <p class="text-xs text-gray-500 -mt-0.5">MVH Copier Solutions • Demo en vivo</p>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="#" class="text-gray-700 hover:text-red-600">Inicio</a>
+        <a href="#consumo" class="text-gray-700 hover:text-red-600">Consumo</a>
+        <a href="#equipos" class="text-gray-700 hover:text-red-600">Equipos</a>
+        <a href="#pagos" class="text-gray-700 hover:text-red-600">Pagos</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button id="btnExportPDF" class="hidden sm:inline-flex bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-700">Exportar PDF</button>
+        <button id="btnExportCSV" class="bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">Exportar CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Client header -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="card p-5 md:p-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <div class="bg-red-100 text-red-700 w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg">AC</div>
+          <div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <h2 class="text-xl md:text-2xl font-extrabold text-gray-900">Acme Corporation S.A.</h2>
+              <span class="pill bg-emerald-100 text-emerald-700">Cuenta Activa</span>
+              <span class="pill bg-indigo-100 text-indigo-700">Contrato de Renta</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">Cuenta: MVH-2024-001 • Ejecutivo: MVH Ventas</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <label for="range" class="text-sm text-gray-600">Rango:</label>
+          <select id="range" class="border border-gray-300 rounded-lg text-sm px-3 py-2">
+            <option value="6">Últimos 6 meses</option>
+            <option value="12">Últimos 12 meses</option>
+          </select>
+          <button id="btnRefresh" class="bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-black">Actualizar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPI cards -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 grid md:grid-cols-4 gap-4">
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-500">Equipos Rentados</p>
+        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+      </div>
+      <p id="kpiEquipos" class="text-3xl font-extrabold mt-2">3</p>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-500">Renta Mensual</p>
+        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-3.866 0-7 1.79-7 4s3.134 4 7 4 7-1.79 7-4-3.134-4-7-4z"/></svg>
+      </div>
+      <p id="kpiRenta" class="text-3xl font-extrabold mt-2">$7,500</p>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-500">Promedio Mensual</p>
+        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12l5 5L20 7"/></svg>
+      </div>
+      <p id="kpiPromedio" class="text-3xl font-extrabold mt-2">$10,633</p>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-500">Total 6 Meses</p>
+        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18"/></svg>
+      </div>
+      <p id="kpiTotal" class="text-3xl font-extrabold mt-2">$63,800</p>
+    </div>
+  </section>
+
+  <!-- Consumo & chart -->
+  <section id="consumo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">Consumo por Mes</h3>
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-gray-500">Ver:</label>
+          <select id="selView" class="border border-gray-300 rounded-lg text-sm px-2 py-1">
+            <option value="paginas">Páginas</option>
+            <option value="costo">Costo</option>
+            <option value="pagado">Pagado</option>
+          </select>
+        </div>
+      </div>
+      <canvas id="chart" height="110"></canvas>
+    </div>
+
+    <div class="card p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Desglose Rápido</h3>
+      <ul class="space-y-3 text-sm">
+        <li class="flex justify-between"><span class="text-gray-500">Total páginas color:</span><span id="sumColor" class="font-semibold">19,500</span></li>
+        <li class="flex justify-between"><span class="text-gray-500">Total páginas B/N:</span><span id="sumBN" class="font-semibold">54,900</span></li>
+        <li class="flex justify-between"><span class="text-gray-500">Costo tóner:</span><span id="sumToner" class="font-semibold">$13,250</span></li>
+        <li class="flex justify-between"><span class="text-gray-500">Servicio:</span><span id="sumServicio" class="font-semibold">$2,050</span></li>
+        <li class="flex justify-between"><span class="text-gray-500">Total pagado:</span><span id="sumPagado" class="font-semibold">$63,800</span></li>
+      </ul>
+      <p class="text-xs text-gray-500 mt-4">Incluye mantenimiento preventivo y tóner original Canon.</p>
+    </div>
+  </section>
+
+  <!-- Tabla -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="card p-6 overflow-x-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">Detalle de Consumo (Últimos 6 meses)</h3>
+        <input id="search" class="border border-gray-300 rounded-lg text-sm px-3 py-2" placeholder="Buscar mes..." />
+      </div>
+      <table id="tbl" class="w-full text-sm">
+        <thead class="text-left text-gray-500">
+          <tr>
+            <th class="py-2">Mes</th>
+            <th class="py-2">Páginas Color</th>
+            <th class="py-2">Páginas B/N</th>
+            <th class="py-2">Costo Tóner</th>
+            <th class="py-2">Servicio</th>
+            <th class="py-2">Total Pagado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-gray-800"></tbody>
+        <tfoot class="border-t border-gray-200 font-semibold">
+          <tr>
+            <td class="py-2">TOTAL</td>
+            <td id="tColor">19,500</td>
+            <td id="tBN">54,900</td>
+            <td id="tToner">$13,250</td>
+            <td id="tServicio">$2,050</td>
+            <td id="tPagado" class="text-red-600">$63,800</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- Equipos -->
+  <section id="equipos" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">Equipos en Renta</h3>
+        <button id="btnSoporte" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700">Solicitar Soporte</button>
+      </div>
+
+      <div id="equiposGrid" class="grid md:grid-cols-3 gap-4"></div>
+    </div>
+  </section>
+
+  <!-- Pagos -->
+  <section id="pagos" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 mb-16">
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">Historial de Pagos</h3>
+        <span class="pill bg-yellow-100 text-yellow-700">Próximo vencimiento: 15/11/2024</span>
+      </div>
+      <ul id="ulPagos" class="text-sm text-gray-700 space-y-2"></ul>
+    </div>
+  </section>
+
+  <script>
+    // Demo dataset (coincide con tus capturas)
+    const DATA = [
+      { mes: 'Mayo 2024', color: 3200, bn: 8500, toner: 2100, servicio: 0, pagado: 9800 },
+      { mes: 'Junio 2024', color: 2850, bn: 9200, toner: 1950, servicio: 0, pagado: 10100 },
+      { mes: 'Julio 2024', color: 3100, bn: 8800, toner: 2250, servicio: 850, pagado: 10300 },
+      { mes: 'Agosto 2024', color: 3450, bn: 9500, toner: 2400, servicio: 0, pagado: 11200 },
+      { mes: 'Septiembre 2024', color: 3300, bn: 9100, toner: 2200, servicio: 1200, pagado: 10900 },
+      { mes: 'Octubre 2024', color: 3600, bn: 9800, toner: 2350, servicio: 0, pagado: 11500 },
+    ];
+
+    const EQUIPOS = [
+      { modelo: 'Canon imageRUNNER ADVANCE C5560i', serie: 'FKL12345', estado: 'Operando', ubicacion: 'Piso 3 - Recepción', contador: 'Color 12,340 | B/N 58,220' },
+      { modelo: 'Canon imageRUNNER ADVANCE C3530i', serie: 'FKL67890', estado: 'Requiere tóner', ubicacion: 'Piso 4 - Finanzas', contador: 'Color 5,210 | B/N 22,100' },
+      { modelo: 'Canon imageRUNNER ADVANCE C5870i', serie: 'FKL54321', estado: 'Mantenimiento', ubicacion: 'Piso 2 - Legal', contador: 'Color 8,900 | B/N 31,450' },
+    ];
+
+    const PAGOS = [
+      { fecha: '15/05/2024', monto: 9800, ref: 'FAC-0001' },
+      { fecha: '15/06/2024', monto: 10100, ref: 'FAC-0002' },
+      { fecha: '15/07/2024', monto: 10300, ref: 'FAC-0003' },
+      { fecha: '15/08/2024', monto: 11200, ref: 'FAC-0004' },
+      { fecha: '15/09/2024', monto: 10900, ref: 'FAC-0005' },
+      { fecha: '15/10/2024', monto: 11500, ref: 'FAC-0006' },
+    ];
+
+    // Fill table
+    const tbody = document.querySelector('#tbl tbody');
+    function formatMoney(n){ return n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}); }
+    function formatInt(n){ return n.toLocaleString('en-US'); }
+
+    function drawTable(rows = DATA) {
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2">${r.mes}</td>
+          <td class="py-2">${formatInt(r.color)}</td>
+          <td class="py-2">${formatInt(r.bn)}</td>
+          <td class="py-2">${formatMoney(r.toner)}</td>
+          <td class="py-2">${formatMoney(r.servicio)}</td>
+          <td class="py-2 font-semibold text-red-600">${formatMoney(r.pagado)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    drawTable();
+
+    // Filter search
+    document.getElementById('search').addEventListener('input', e => {
+      const v = e.target.value.toLowerCase();
+      drawTable(DATA.filter(x => x.mes.toLowerCase().includes(v)));
+    });
+
+    // Equipos grid
+    const equiposGrid = document.getElementById('equiposGrid');
+    function estadoPill(estado){
+      if(estado === 'Operando') return '<span class="pill bg-emerald-100 text-emerald-700">Operando</span>';
+      if(estado === 'Mantenimiento') return '<span class="pill bg-amber-100 text-amber-700">Mantenimiento</span>';
+      return '<span class="pill bg-red-100 text-red-700">Atención</span>';
+    }
+    EQUIPOS.forEach(eq => {
+      const div = document.createElement('div');
+      div.className = 'border border-gray-200 rounded-xl p-4';
+      div.innerHTML = `
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="font-bold text-gray-900">${eq.modelo}</p>
+            <p class="text-xs text-gray-500">Serie: ${eq.serie}</p>
+            <p class="text-xs text-gray-500">Ubicación: ${eq.ubicacion}</p>
+            <p class="text-xs text-gray-500">Contador: ${eq.contador}</p>
+          </div>
+          ${estadoPill(eq.estado)}
+        </div>
+        <div class="mt-3 flex gap-2">
+          <button class="px-3 py-1 text-xs rounded-lg border border-gray-300 hover:bg-gray-50">Detalle</button>
+          <button class="px-3 py-1 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700">Ticket</button>
+        </div>
+      `;
+      equiposGrid.appendChild(div);
+    });
+
+    // Pagos
+    const ulPagos = document.getElementById('ulPagos');
+    PAGOS.forEach(p => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="text-gray-500">${p.fecha}</span> — <span class="font-semibold">${formatMoney(p.monto)}</span> <span class="text-gray-400">(${p.ref})</span>`;
+      ulPagos.appendChild(li);
+    });
+
+    // Chart
+    const ctx = document.getElementById('chart').getContext('2d');
+    const labels = DATA.map(d => d.mes);
+    const chartState = {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Total Pagado',
+          data: DATA.map(d => d.pagado),
+          tension: .35,
+          borderWidth: 2,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true } },
+        scales: {
+          y: { ticks: { callback: (v)=>'$'+v } }
+        }
+      }
+    };
+    let chart = new Chart(ctx, chartState);
+
+    function updateChart(view){
+      let label = 'Total Pagado';
+      let data = DATA.map(d => d.pagado);
+      let yFmt = (v) => '$'+v;
+
+      if(view === 'paginas'){
+        label = 'Total Páginas';
+        data = DATA.map(d => d.color + d.bn);
+        yFmt = (v) => v.toLocaleString('en-US');
+      } else if(view === 'costo'){
+        label = 'Costo Tóner + Servicio';
+        data = DATA.map(d => d.toner + d.servicio);
+        yFmt = (v) => '$'+v;
+      }
+
+      chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets: [{ label, data, tension: .35, borderWidth: 2, fill: false }] },
+        options: { responsive: true, plugins: { legend: { display: true } }, scales: { y: { ticks: { callback: yFmt } } } }
+      });
+    }
+
+    document.getElementById('selView').addEventListener('change', (e)=> updateChart(e.target.value));
+
+    // Export CSV
+    document.getElementById('btnExportCSV').addEventListener('click', ()=>{
+      const headers = ['Mes','Paginas_Color','Paginas_BN','Costo_Toner','Servicio','Total_Pagado'];
+      const rows = DATA.map(d => [d.mes,d.color,d.bn,d.toner,d.servicio,d.pagado]);
+      let csv = headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'consumo_6_meses.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Print to PDF (via browser)
+    document.getElementById('btnExportPDF').addEventListener('click', ()=> window.print());
+
+    // Dummy refresh
+    document.getElementById('btnRefresh').addEventListener('click', ()=>{
+      // In producción, aquí llamas a tu API y vuelves a poblar DATA / KPIs
+      alert('Datos actualizados (demo).');
+    });
+
+    // Soporte
+    document.getElementById('btnSoporte').addEventListener('click', ()=>{
+      alert('Ticket creado (demo). Un agente MVH se comunicará con usted.');
+    });
+  </script>
+</body>
+</html>
